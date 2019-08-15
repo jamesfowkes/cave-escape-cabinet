@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<board type="Arduino Nano" name="Cave Escape Cabinet">
+
+    <info>
+        Maglock and switch controller for Cave Escape 'Mounments Men'
+        cabinet puzzle
+    </info>
+
+    <devices>
+        <device name="Ethernet" type="ENC28J60">
+            <setting id="cs_pin" value="10"></setting>
+        </device>
+
+        <device name="Maglock1" type="Digital Output">
+                <setting id="pin" value="2"/>
+                <setting id="startup_state" value="HIGH"/>
+        </device>
+
+        <device name="Maglock2" type="Digital Output">
+                <setting id="pin" value="3"/>
+                <setting id="startup_state" value="HIGH"/>
+        </device>
+
+        <device name="HandleSenseInput" type="Debounced Input">
+                <setting id="pin" value="4"/>
+                <setting id="debounce_time" value="50"/>
+                <setting id="pullup" value="false"/>
+        </device>
+
+         <device name="LockingServo" type="Servo">
+                <setting id="pin" value="5"/>
+        </device>
+    </devices>
+
+    <modules>
+        <module>HTTP Get Server</module>
+        <module>Task</module>
+    </modules>
+
+    <custom_code>
+        <file>application.cpp</file>
+    </custom_code>
+
+    <defines>
+        <define>ENC28J60_BUFFER_SIZE 128</define>
+    </defines>
+
+    <logging>
+        <log_module>APPLICATION</log_module>
+    </logging>
+
+    <raat protocol="url"></raat>
+</board>

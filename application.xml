@@ -19,13 +19,18 @@
 
         <device name="Maglock2" type="Digital Output">
                 <setting id="pin" value="3"/>
+                <setting id="startup_state" value="LOW"/>
+        </device>
+
+        <device name="ServoPower" type="Digital Output">
+                <setting id="pin" value="4"/>
                 <setting id="startup_state" value="HIGH"/>
         </device>
 
         <device name="HandleSenseInput" type="Debounced Input">
-                <setting id="pin" value="4"/>
-                <setting id="debounce_time" value="50"/>
-                <setting id="pullup" value="false"/>
+                <setting id="pin" value="6"/>
+                <setting id="debounce_time" value="200"/>
+                <setting id="pullup" value="true"/>
         </device>
 
          <device name="LockingServo" type="Servo">
@@ -50,5 +55,5 @@
         <log_module>APPLICATION</log_module>
     </logging>
 
-    <raat protocol="url"></raat>
+    <raat protocol="url" loglevel="RAAT_LOG_LEVEL_DEBUG"></raat>
 </board>

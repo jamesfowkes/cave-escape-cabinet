@@ -79,7 +79,7 @@ static void release_pigeon(char const * const url)
     {
         send_standard_erm_response();
     }
-    s_pDevices->pMaglock2->set(false);
+    s_pDevices->pMaglock2->set(true);
 }
 
 static const char CABINET_STATUS_URL[] PROGMEM = "/cabinet/status";

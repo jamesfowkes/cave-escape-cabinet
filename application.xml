@@ -36,6 +36,12 @@
          <device name="LockingServo" type="Servo">
                 <setting id="pin" value="5"/>
         </device>
+
+        <device name="OverrideCabinet" type="Debounced Input">
+                <setting id="pin" value="7"/>
+                <setting id="debounce_time" value="100"/>
+                <setting id="pullup" value="true"/>
+        </device>
     </devices>
 
     <modules>

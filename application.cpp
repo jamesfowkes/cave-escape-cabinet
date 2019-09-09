@@ -14,6 +14,7 @@
 
 static HTTPGetServer s_server(true);
 static const raat_devices_struct * s_pDevices = NULL;
+static bool s_override = false;
 
 static void depower_servo_task_fn(RAATOneShotTask& this_task, void * pTaskData)
 {
@@ -72,6 +73,16 @@ static void release_back(char const * const url)
     s_pDevices->pMaglock1->set(false);
 }
 
+static void engage_back(char const * const url)
+{
+    raat_logln_P(LOG_APP, PSTR("Engaging back"));
+    if (url)
+    {
+        send_standard_erm_response();
+    }
+    s_pDevices->pMaglock1->set(true);
+}
+
 static void release_pigeon(char const * const url)
 {
     raat_logln_P(LOG_APP, PSTR("Releasing pigeon"));
@@ -86,6 +97,7 @@ static const char CABINET_STATUS_URL[] PROGMEM = "/cabinet/status";
 static const char CABINET_LOCK_DOOR_URL[] PROGMEM = "/cabinet/door/lock";
 static const char CABINET_UNLOCK_DOOR_URL[] PROGMEM = "/cabinet/door/unlock";
 static const char CABINET_RELEASE_BACK_URL[] PROGMEM = "/cabinet/back/release";
+static const char CABINET_ENGAGE_BACK_URL[] PROGMEM = "/cabinet/back/engage";
 static const char PIGEON_RELEASE_URL[] PROGMEM = "/pigeon/release";
 
 static http_get_handler s_handlers[] = 
@@ -94,6 +106,7 @@ static http_get_handler s_handlers[] =
     {CABINET_LOCK_DOOR_URL, lock_door},
     {CABINET_UNLOCK_DOOR_URL, unlock_door},
     {CABINET_RELEASE_BACK_URL, release_back},
+    {CABINET_ENGAGE_BACK_URL, engage_back},
     {PIGEON_RELEASE_URL, release_pigeon},
     {"", NULL}
 };
@@ -127,21 +140,39 @@ void raat_custom_loop(const raat_devices_struct& devices, const raat_params_stru
     (void)params;
     static bool s_locked_once = false;
 
-    if (devices.pHandleSenseInput->check_low_and_clear())
+    if (!s_override)
     {
-        lock_door(NULL);
-        if (s_locked_once)
+        if (devices.pHandleSenseInput->check_low_and_clear())
         {
-            s_unlock_back_delay_task.start();
+            lock_door(NULL);
+            if (s_locked_once)
+            {
+                s_unlock_back_delay_task.start();
+            }
+            else
+            {
+                raat_logln_P(LOG_APP, PSTR("Back release primed for next lock"));                
+                s_locked_once = true;
+            }
         }
-        else
+        else if (devices.pHandleSenseInput->check_high_and_clear())
         {
-            s_locked_once = true;
+            unlock_door(NULL);   
         }
     }
-    else if (devices.pHandleSenseInput->check_high_and_clear())
+
+    if (devices.pOverrideCabinet->check_low_and_clear())
     {
-        unlock_door(NULL);   
+        s_locked_once = false;
+        s_override = !s_override;
+        raat_logln_P(LOG_APP, PSTR("Override %s"), s_override ? "on" : "off");
+        if (s_override)
+        {
+            release_back(NULL);
+            unlock_door(NULL);
+            delay(200);
+            engage_back(NULL);
+        }
     }
 
     s_depower_servo_task.run();
